@@ -1,0 +1,1 @@
+export type NotificationType = { text: string | null, type: "error" | "success" | "warning" | null }

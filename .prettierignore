@@ -1,0 +1,5 @@
+.next
+.vscode
+tsconfig.json
+.eslintrc.json
+next-env.d.ts

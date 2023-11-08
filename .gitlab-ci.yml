@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------------------------------------------
+# STAGING ENVIRONMENT
+# ---------------------------------------------------------------------------------------------------
+
+variables:
+  ZAPPY_EMPLOYEE_WEBSITE_DIR: "employee-website"
+  ZAPPY_EMPLOYEE_WEBSITE_TAG: "registry.gitlab.com/zappy3/$CI_PROJECT_NAME/$ZAPPY_EMPLOYEE_WEBSITE_DIR:stag"
+
+build_employee-website:
+  stage: build
+  image: docker:20.10.16
+
+  variables:
+    # When using dind service, you must instruct docker to talk with the
+    # daemon started inside of the service. The daemon is available with
+    # a network connection instead of the default /var/run/docker.sock socket.
+    #
+    # The 'docker' hostname is the alias of the service container as described at
+    # https://docs.gitlab.com/ee/ci/docker/using_docker_images.html#accessing-the-services
+    #
+    # If you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
+    # the variable must be set to tcp://localhost:2375 because of how the
+    # Kubernetes executor connects services to the job container
+    # DOCKER_HOST: tcp://localhost:2375
+    #
+    DOCKER_HOST: tcp://docker:2375
+    #
+    # This instructs Docker not to start over TLS.
+    DOCKER_TLS_CERTDIR: ""
+
+  services:
+    - docker:20.10.16-dind
+
+  script:
+    - cd $ZAPPY_EMPLOYEE_WEBSITE_DIR
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t ${ZAPPY_EMPLOYEE_WEBSITE_TAG} .
+    - docker push ${ZAPPY_EMPLOYEE_WEBSITE_TAG}
+  when: manual
+  tags:
+    - zappy-micro-services-builder
+
+deploy_employee-website:
+  stage: deploy
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - cp docker-compose-stag.yml /home/zappy/zappy-micro-services/docker-compose.yml
+    - cd /home/zappy/zappy-micro-services
+    - docker-compose stop ${ZAPPY_EMPLOYEE_WEBSITE_DIR}
+    - docker rmi -f ${ZAPPY_EMPLOYEE_WEBSITE_TAG}
+    - docker-compose rm -f ${ZAPPY_EMPLOYEE_WEBSITE_DIR}
+    - docker-compose pull ${ZAPPY_EMPLOYEE_WEBSITE_DIR}
+    - docker-compose up -d
+  when: manual
+  needs: ["build_employee-website"]
+  tags:
+    - zappy-micro-services-deployer

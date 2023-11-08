@@ -1,0 +1,66 @@
+@import "./fonts.css";
+
+body {
+  font-family: "Montserrat", sans-serif;
+  margin: unset;
+  font-size: 16px;
+}
+
+.container {
+  margin: 0 auto;
+}
+
+input::placeholder {
+  color: rgba(96, 96, 96, 0.4);
+  font-family: "Montserrat";
+}
+
+input,
+button {
+  font-family: "Montserrat";
+}
+
+/* //Toast */
+.toast-progress.active:before {
+  animation: progress 3s linear forwards;
+}
+
+@keyframes progress {
+  100% {
+    right: 100%;
+  }
+}
+
+.pincode-input-container input{
+  width: 48px !important;
+  height: 48px !important;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 2px solid transparent !important;
+  background-color: white !important;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  margin: 0 !important;
+}
+
+.pincode-input-container{
+  display: flex !important;
+  justify-content: space-between;
+}
+
+.pincode-input-text::placeholder{
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  color: rgba(96, 96, 96, 0.4) !important;
+}
+
+select  { 
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  color: rgba(96, 96, 96, 0.4);
+}

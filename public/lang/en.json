@@ -1,0 +1,11 @@
+{
+  "title": "Welcome",
+  "subTitle": "Warm welcome and <br/> congratulations on getting hired!",
+  "step1CardTitle": "Date of Birth",
+  "step1SubTitle": "Please submit your Date of Birth",
+  "day": "Day",
+  "month": "Month",
+  "year": "Year",
+  "btnContinue": "Continue",
+  "errorBirthDay": "Invalid Date of Birth!"
+}
