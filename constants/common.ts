@@ -1,4 +1,3 @@
-import Leave from "pages/leave";
 import { IAppContext } from "../interfaces/common.interface";
 
 export const STORAGE_PREFIX = "zappy";
@@ -16,14 +15,16 @@ export const INIT_STORAGE: IAppContext = {
   },
 };
 
-export const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-export const zappyEndpoint = process.env.ZAPPY_END_POINT || 'https://zappy-stag.lotuslab.io';
+export const emailRegex =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+export const zappyEndpoint =
+  process.env.ZAPPY_END_POINT || "http://54.251.215.218";
 
-export const ANNUAL_LEAVE_NAME = "Annual Leave"
-export const CASUAL_LEAVE_NAME = "Casual Leave"
+export const ANNUAL_LEAVE_NAME = "Annual Leave";
+export const CASUAL_LEAVE_NAME = "Casual Leave";
 
 export const LEAVE_REQUEST_TYPE = {
-  confirm: 'pending',
-  refuse: 'declined',
-  validate: 'approved',
-}
+  confirm: "pending",
+  refuse: "declined",
+  validate: "approved",
+};
