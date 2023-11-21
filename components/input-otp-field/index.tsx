@@ -6,18 +6,28 @@ type InputOTPFieldProps = {
   [x: string]: any;
   name?: string;
   placeHolder?: string;
-  refOtp?: any
+  refOtp?: any;
+  initialValue?: string;
 };
 
 const InputOTPField: React.FC<InputOTPFieldProps> = ({
   name,
   placeHolder = "0",
   refOtp,
+  initialValue,
   ...props
 }) => {
   return (
     <InputOTPWrapper isError={props.isError}>
-      <PinInput length={6} ref={refOtp} placeholder="0" type="numeric" inputMode='numeric' onChange={props.onChange} />
+      <PinInput
+        initialValue={initialValue}
+        length={6}
+        ref={refOtp}
+        placeholder="0"
+        type="numeric"
+        inputMode="numeric"
+        onChange={props.onChange}
+      />
       {/* {Array.from(Array(6).keys()).map((item) => (
         <InputDivContainer 
           styleWrapper={{

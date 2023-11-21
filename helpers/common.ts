@@ -22,17 +22,20 @@ export const deepCopy = (obj: any, hash = new WeakMap()) => {
 };
 
 export const formatNationalId = (txt: string) => {
-  return Array.from(txt).map((item: string, index: number) =>
-    [2, 4, 6].includes(index) ? `${item} ` : item).join('');
-}
+  return Array.from(txt)
+    .map((item: string, index: number) =>
+      [2, 4, 6].includes(index) ? `${item} ` : item
+    )
+    .join("");
+};
 
 export const removeHeadBase64 = (base64: string) => {
-  return base64.replace('data:image/png;base64,', '');
-}
+  return base64.replace("data:image/png;base64,", "");
+};
 
 export const formatPhoneFromUrl = (phone_number: string) => {
-  return `+${phone_number?.toString().trim().replace('+', '')}`;
-}
+  return `+${phone_number?.toString().trim().replace("+", "")}`;
+};
 
 export const cleanObject = (obj: any) => {
   let result: any = {};
@@ -43,4 +46,15 @@ export const cleanObject = (obj: any) => {
     });
   }
   return result;
+};
+
+export const getQueryParam = (paramName: string) => {
+  try {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const valueByQueryName = urlParams.get(paramName);
+    return valueByQueryName;
+  } catch (error) {
+    return "";
+  }
 };

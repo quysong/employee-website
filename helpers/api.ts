@@ -21,6 +21,7 @@ export const sendRequest = async (url: string, options: any) => {
 
   try {
     const fetchRequest = await fetch(`${zappyEndpoint}/${url}`, options).then((response) => {
+      console.log(zappyEndpoint)
       return response
     }).then((response) => {
       return response.json()

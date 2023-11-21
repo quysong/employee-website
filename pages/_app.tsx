@@ -1,16 +1,16 @@
 import "assets/globalStyles.css";
-import NavigationBottomContainer from "containers/navigation-bottom/navigation-bottom";
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import { useRouter } from "next/router";
 import { ThemeProvider } from "styled-components";
 import { useLocalStorage } from "usehooks-ts";
 import { defaultTheme } from "../components/themes/defaultTheme";
 import { GlobalStyle } from "../components/themes/globalStyle";
+import NavigationBottomContainer from "containers/navigation-bottom/navigation-bottom";
+import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [theme] = useLocalStorage("theme", defaultTheme);
-  const { pathname } = useRouter();
+  const {pathname} = useRouter();
   return (
     <>
       <Head>
@@ -22,8 +22,10 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <ThemeProvider theme={theme}>
         <GlobalStyle />
-        <Component {...pageProps} />
-        {!pathname.includes("onboard") && <NavigationBottomContainer />}
+        <Component {...pageProps} /> 
+        {
+          !(pathname.includes('onboard') || pathname.includes('checkin-checkout')) &&<NavigationBottomContainer/>
+        }
       </ThemeProvider>
     </>
   );

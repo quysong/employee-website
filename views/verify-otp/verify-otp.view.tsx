@@ -2,18 +2,17 @@ import NormalButton from "components/button/submit";
 import NormalCard from "components/card";
 import InputOTPField from "components/input-otp-field";
 import HeaderContainer from "containers/layout/header.container";
-import { useRouter } from "next/router";
 import {
   CenterElementWrapper,
   ErrorMessage,
   FormWrapper,
-  ResendOTPWrapper,
   HeadText,
-  TitleSmallExtend,
   HeadTextSpan,
+  ResendOTPWrapper,
+  Title,
+  TitleSmallExtend,
   ViewBox,
   Wrapper,
-  Title,
 } from "./verify-otp.style";
 
 interface VerifyOtpViewProps {
@@ -22,6 +21,7 @@ interface VerifyOtpViewProps {
   onClickNumber?: (value: string, e?: React.MouseEvent<HTMLDivElement>) => void;
   setCurrentFocusInput?: (value: number | null) => void;
   currentFocusInput?: number | null;
+  initialValue?: string;
 }
 
 const VerifyOtpView = ({
@@ -33,7 +33,8 @@ const VerifyOtpView = ({
   errorMessage,
   resendOtp,
   count,
-  t
+  t,
+  initialValue,
 }: VerifyOtpViewProps) => {
   return (
     <Wrapper>
@@ -50,6 +51,7 @@ const VerifyOtpView = ({
             </TitleSmallExtend>
             <FormWrapper>
               <InputOTPField
+                initialValue={initialValue}
                 name="otp"
                 onChange={(curr: string) => setValue("otp", curr)}
                 isError={errorMessage}
