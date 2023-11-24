@@ -2,7 +2,7 @@ import Loading from "components/loading";
 import BasicModal from "components/modal";
 import ToastContainer from "containers/toast/toast.container";
 import { sendRequest } from "helpers/api";
-import { formatPhoneFromUrl, getQueryParam } from "helpers/common";
+import { formatPhoneFromUrl } from "helpers/common";
 import useAppStorage from "hooks/useAppStorage";
 import {
   CheckinCheckoutForm,
@@ -138,6 +138,7 @@ const CheckoutContainer = (props: CheckoutContainer) => {
   );
 
   useEffect(() => {
+    if (!query.first_name || !query.phone_number) return;
     if ("geolocation" in navigator) {
       // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
       navigator.geolocation.getCurrentPosition(({ coords }) => {
@@ -147,16 +148,16 @@ const CheckoutContainer = (props: CheckoutContainer) => {
       });
     }
 
-    const otp_code = getQueryParam("otp_code");
     // If url also includes otp_code
-    if (otp_code) {
+    if (query.otp_code) {
       const searchString = window.location.search;
       push({
         pathname: "/checkin-checkout/checkout/verify-otp",
         query: searchString.replace("?", ""),
       });
     }
-  }, []);
+  }, [query]);
+
   return (
     <Suspense fallback={<Loading />}>
       {isShowLoading && (
