@@ -2,7 +2,7 @@ import Loading from "components/loading";
 import BasicModal from "components/modal";
 import ToastContainer from "containers/toast/toast.container";
 import { sendRequest } from "helpers/api";
-import { formatPhoneFromUrl, getQueryParam } from "helpers/common";
+import { formatPhoneFromUrl } from "helpers/common";
 import useAppStorage from "hooks/useAppStorage";
 import useTrans from "hooks/useTrans";
 import { CheckinCheckoutGeoLocation } from "interfaces/checkin-checkout.interface";
@@ -14,7 +14,6 @@ import { useCountdown } from "usehooks-ts";
 import VerifyOtpView from "views/verify-otp/verify-otp.view";
 
 const VerifyOtpContainer = () => {
-  const otp_code = getQueryParam("otp_code");
   const { appStorage, setStorage } = useAppStorage();
   const [location, setLocation] = useState<CheckinCheckoutGeoLocation>();
 
@@ -62,6 +61,7 @@ const VerifyOtpContainer = () => {
   }, [appStorage]);
 
   useEffect(() => {
+    if (!query.first_name || !query.phone_number) return;
     if ("geolocation" in navigator) {
       // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
       navigator.geolocation.getCurrentPosition(({ coords }) => {
@@ -72,8 +72,8 @@ const VerifyOtpContainer = () => {
     }
 
     // If url also includes otp_code
-    if (otp_code) {
-      onSubmit({ otp: otp_code });
+    if (query.otp_code) {
+      onSubmit({ otp: query.otp_code || "" });
     }
   }, []);
 
@@ -210,6 +210,7 @@ const VerifyOtpContainer = () => {
         resendOtp={resendOtp}
         count={count}
         firstName={query.first_name}
+        initialValue={query.otp_code?.toString() || undefined}
       />
     </Suspense>
   );
