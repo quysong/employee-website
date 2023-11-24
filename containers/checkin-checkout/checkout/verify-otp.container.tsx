@@ -2,7 +2,7 @@ import Loading from "components/loading";
 import BasicModal from "components/modal";
 import ToastContainer from "containers/toast/toast.container";
 import { sendRequest } from "helpers/api";
-import { formatPhoneFromUrl } from "helpers/common";
+import { formatPhoneFromUrl, getQueryParam } from "helpers/common";
 import useAppStorage from "hooks/useAppStorage";
 import useTrans from "hooks/useTrans";
 import { CheckinCheckoutGeoLocation } from "interfaces/checkin-checkout.interface";
@@ -69,6 +69,12 @@ const VerifyOtpContainer = () => {
         setLocation({ latitude, longitude });
       });
     }
+
+    const otp_code = getQueryParam("otp_code");
+    // If url also includes otp_code
+    if (otp_code) {
+      onSubmit({ otp: otp_code });
+    }
   }, []);
 
   const onCheckoutSubmit = async (sessionId: string | null) => {
@@ -115,7 +121,7 @@ const VerifyOtpContainer = () => {
     }
   };
 
-  const onSubmit = async (values: { otp: string | any[] }, event: any) => {
+  const onSubmit = async (values: { otp: string | any[] }, event?: any) => {
     if (values?.otp.length < 6) {
       setError("otp", {
         message: "The number code is wrong",
