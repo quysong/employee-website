@@ -14,6 +14,7 @@ import { useCountdown } from "usehooks-ts";
 import VerifyOtpView from "views/verify-otp/verify-otp.view";
 
 const VerifyOtpContainer = () => {
+  const otp_code = getQueryParam("otp_code");
   const { appStorage, setStorage } = useAppStorage();
   const [location, setLocation] = useState<CheckinCheckoutGeoLocation>();
 
@@ -70,7 +71,6 @@ const VerifyOtpContainer = () => {
       });
     }
 
-    const otp_code = getQueryParam("otp_code");
     // If url also includes otp_code
     if (otp_code) {
       onSubmit({ otp: otp_code });
