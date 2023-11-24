@@ -17,7 +17,8 @@ export const INIT_STORAGE: IAppContext = {
 
 export const emailRegex =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-export const zappyEndpoint = process.env.ZAPPY_END_POINT || "https://0b46-54-169-119-168.ngrok-free.app";
+export const zappyEndpoint =
+  process.env.ZAPPY_END_POINT || "https://de11-54-169-119-168.ngrok-free.app";
 
 export const ANNUAL_LEAVE_NAME = "Annual Leave";
 export const CASUAL_LEAVE_NAME = "Casual Leave";
