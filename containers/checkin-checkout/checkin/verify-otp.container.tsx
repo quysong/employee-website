@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { useCountdown } from "usehooks-ts";
 import VerifyOtpView from "views/verify-otp/verify-otp.view";
 
+let submittedFlowOtp = false;
 const VerifyOtpContainer = () => {
   const { appStorage, setStorage } = useAppStorage();
   const [location, setLocation] = useState<CheckinCheckoutGeoLocation>();
@@ -61,7 +62,6 @@ const VerifyOtpContainer = () => {
   }, [appStorage]);
 
   useEffect(() => {
-    if (!query.first_name || !query.phone_number) return;
     if ("geolocation" in navigator) {
       // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
       navigator.geolocation.getCurrentPosition(({ coords }) => {
@@ -70,13 +70,22 @@ const VerifyOtpContainer = () => {
         setLocation({ latitude, longitude });
       });
     }
+  }, []);
 
-    // If url also includes otp_code
+  useEffect(() => {
+    if (
+      !query?.first_name ||
+      !query?.phone_number ||
+      !query?.otp_code ||
+      !location
+    )
+      return;
     const otp_code = query.otp_code;
-    if (query.otp_code) {
+    if (otp_code && !submittedFlowOtp) {
+      submittedFlowOtp = true;
       onSubmit({ otp: otp_code || "" });
     }
-  }, [query]);
+  }, [query, location]);
 
   const onCheckinSubmit = async (sessionId: string | null) => {
     if (!location) {
@@ -128,33 +137,40 @@ const VerifyOtpContainer = () => {
         message: "The number code is wrong",
         type: "required",
       });
-      return;
+      return Promise.resolve();
     }
     setIsShowLoading(true);
-    const options = {
-      method: "POST",
-      body: JSON.stringify({
-        phone_number: formatPhoneFromUrl(query.phone_number as string),
-        otp_code: values?.otp,
-      }),
-    };
+    try {
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          phone_number: formatPhoneFromUrl(query.phone_number as string),
+          otp_code: values?.otp,
+        }),
+      };
 
-    const responseData = await sendRequest("public/employee_otp/auth", options);
-    console.log(responseData);
+      const responseData = await sendRequest(
+        "public/employee_otp/auth",
+        options
+      );
+      console.log(responseData);
 
-    if (responseData.session && responseData.session?.sid) {
-      //TODO call api submit dataa
-      console.log("setStorage()");
-      setStorage({
-        ...appStorage,
-        sessionId: responseData.session?.sid,
-      } as any);
-      onCheckinSubmit(responseData?.session?.sid || null);
-    } else {
-      setNotification({
-        text: responseData.description,
-        type: "error",
-      });
+      if (responseData.session && responseData.session?.sid) {
+        //TODO call api submit dataa
+        console.log("setStorage()");
+        setStorage({
+          ...appStorage,
+          sessionId: responseData.session?.sid,
+        } as any);
+        onCheckinSubmit(responseData?.session?.sid || null);
+      } else {
+        setNotification({
+          text: responseData.description,
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.log("error", error);
     }
 
     setIsShowLoading(false);

@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { useCountdown } from "usehooks-ts";
 import VerifyOtpView from "views/verify-otp/verify-otp.view";
 
+let submittedFlowOtp = false;
 const VerifyOtpContainer = () => {
   const { appStorage, setStorage } = useAppStorage();
   const [location, setLocation] = useState<CheckinCheckoutGeoLocation>();
@@ -61,7 +62,6 @@ const VerifyOtpContainer = () => {
   }, [appStorage]);
 
   useEffect(() => {
-    if (!query.first_name || !query.phone_number) return;
     if ("geolocation" in navigator) {
       // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
       navigator.geolocation.getCurrentPosition(({ coords }) => {
@@ -70,12 +70,22 @@ const VerifyOtpContainer = () => {
         setLocation({ latitude, longitude });
       });
     }
-
-    // If url also includes otp_code
-    if (query.otp_code) {
-      onSubmit({ otp: query.otp_code || "" });
-    }
   }, []);
+
+  useEffect(() => {
+    if (
+      !query?.first_name ||
+      !query?.phone_number ||
+      !query?.otp_code ||
+      !location
+    )
+      return;
+    const otp_code = query.otp_code;
+    if (otp_code && !submittedFlowOtp) {
+      submittedFlowOtp = true;
+      onSubmit({ otp: otp_code || "" });
+    }
+  }, [query, location]);
 
   const onCheckoutSubmit = async (sessionId: string | null) => {
     if (!location) {
@@ -127,7 +137,7 @@ const VerifyOtpContainer = () => {
         message: "The number code is wrong",
         type: "required",
       });
-      return;
+      return Promise.resolve();
     }
     setIsShowLoading(true);
     const options = {

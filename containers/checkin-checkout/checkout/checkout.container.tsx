@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import CheckoutView from "../../../views/checkin-checkout/checkout/checkout.view";
 
 interface CheckoutContainer {}
+let submittedFlowOtp = false;
 const CheckoutContainer = (props: CheckoutContainer) => {
   const { push, query, asPath } = useRouter();
   const [location, setLocation] = useState<CheckinCheckoutGeoLocation>();
@@ -44,6 +45,7 @@ const CheckoutContainer = (props: CheckoutContainer) => {
       }),
       headers: {},
     };
+    setIsShowLoading(true);
     const responseData = await sendRequest(
       "public/employee_otp/resend",
       options
@@ -63,13 +65,14 @@ const CheckoutContainer = (props: CheckoutContainer) => {
   };
 
   const onCheckinCheckoutRequest = async () => {
+    setIsShowLoading(true);
     if (!location) {
       setNotification({
         text: "Cannot get location information. Please refresh page and allow access location service.",
         type: "error",
       });
       setIsShowLoading(false);
-      return;
+      return Promise.resolve();
     }
     const options = {
       method: "POST",
@@ -110,8 +113,6 @@ const CheckoutContainer = (props: CheckoutContainer) => {
     (values: CheckinCheckoutForm) => {
       const {} = watch();
 
-      setIsShowLoading(true);
-
       if (appStorage.sessionId) {
         onCheckinCheckoutRequest();
       } else {
@@ -120,7 +121,6 @@ const CheckoutContainer = (props: CheckoutContainer) => {
             text: "Missing Phone number",
             type: "error",
           });
-          setIsShowLoading(false);
           return;
         }
         sendOtp();
@@ -138,7 +138,6 @@ const CheckoutContainer = (props: CheckoutContainer) => {
   );
 
   useEffect(() => {
-    if (!query.first_name || !query.phone_number) return;
     if ("geolocation" in navigator) {
       // Retrieve latitude & longitude coordinates from `navigator.geolocation` Web API
       navigator.geolocation.getCurrentPosition(({ coords }) => {
@@ -147,9 +146,11 @@ const CheckoutContainer = (props: CheckoutContainer) => {
         setLocation({ latitude, longitude });
       });
     }
+  }, []);
 
+  useEffect(() => {
     // If url also includes otp_code
-    if (query.otp_code) {
+    if (query?.otp_code && !submittedFlowOtp) {
       const searchString = window.location.search;
       push({
         pathname: "/checkin-checkout/checkout/verify-otp",
