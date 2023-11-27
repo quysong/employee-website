@@ -1,5 +1,9 @@
 import { sendRequest } from "helpers/api";
-import { cleanObject, formatPhoneFromUrl, removeHeadBase64 } from "helpers/common";
+import {
+  cleanObject,
+  formatPhoneFromUrl,
+  removeHeadBase64,
+} from "helpers/common";
 import { formatDateDMY } from "helpers/date";
 import useTrans from "hooks/useTrans";
 import { NotificationType } from "interfaces/notification.interface";
@@ -25,11 +29,11 @@ const Step4Container = ({
   setIsShowLoading,
   isShowLoading,
   setStorage,
-  appStorage
+  appStorage,
 }: Step4ContainerProps) => {
   const { t } = useTrans();
   const {
-    query: { phone_number },
+    query: { phone_number, user_id },
   } = useRouter();
 
   const refOtp: any = useRef();
@@ -43,13 +47,12 @@ const Step4Container = ({
     clearErrors,
   } = useForm();
 
-  const [count, { startCountdown, resetCountdown }] =
-  useCountdown({
+  const [count, { startCountdown, resetCountdown }] = useCountdown({
     countStart: 61,
     intervalMs: 1000,
-  })
+  });
 
-  const [errorMes, setErrorMes] = useState<string| null> ()
+  const [errorMes, setErrorMes] = useState<string | null>();
 
   const { otp } = watch();
   useEffect(() => {
@@ -58,30 +61,36 @@ const Step4Container = ({
       return;
     }
     setValue("otp", "");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitCount, otp]);
 
   const callApiUpdateProfile = async (sessionId: string) => {
-    setErrorMes(null)
+    setErrorMes(null);
     const birthday = appStorage.onboard.step1.birthday;
-    const resUpdateProfile = await sendRequest('private/employee_profile', {
-      method: 'PUT',
+    const resUpdateProfile = await sendRequest("private/employee_profile", {
+      method: "PUT",
       headers: {
-        'X-Openerp-Session-Id': sessionId,
-        'Accept': '*/*',
-        'Content-Type': 'application/json'
+        "X-Openerp-Session-Id": sessionId,
+        Accept: "*/*",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(cleanObject({
-        birthday: formatDateDMY(birthday.day, birthday.month, birthday.year),
-        ...{
-          ...appStorage.onboard.step2,
-          national_card_front: removeHeadBase64(appStorage.onboard.step2.national_card_front),
-          national_card_back: removeHeadBase64(appStorage.onboard.step2.national_card_back)
-        },
-        ...appStorage.onboard.step3
-      }))
-    })
-    if(resUpdateProfile.status === 'success'){
+      body: JSON.stringify(
+        cleanObject({
+          birthday: formatDateDMY(birthday.day, birthday.month, birthday.year),
+          ...{
+            ...appStorage.onboard.step2,
+            national_card_front: removeHeadBase64(
+              appStorage.onboard.step2.national_card_front
+            ),
+            national_card_back: removeHeadBase64(
+              appStorage.onboard.step2.national_card_back
+            ),
+          },
+          ...appStorage.onboard.step3,
+        })
+      ),
+    });
+    if (resUpdateProfile.status === "success") {
       resetCountdown();
       setSlides({
         ...slides,
@@ -92,19 +101,19 @@ const Step4Container = ({
         step5: true,
       });
       setIndexSwipe(0);
-    }else { 
-      if(resUpdateProfile.name){
-        setErrorMes(resUpdateProfile.name)
-      }else {
-        setErrorMes(resUpdateProfile.description)
+    } else {
+      if (resUpdateProfile.name) {
+        setErrorMes(resUpdateProfile.name);
+      } else {
+        setErrorMes(resUpdateProfile.description);
       }
     }
     setIsShowLoading(false);
-  }
+  };
 
-  const onSubmit = async (values: { otp: string | any[]; }) => {
-    setErrorMes(null)
-    if(isShowLoading) return;
+  const onSubmit = async (values: { otp: string | any[] }) => {
+    setErrorMes(null);
+    if (isShowLoading) return;
     if (values?.otp.length < 6) {
       setError("otp", {
         message: "The number code is wrong",
@@ -113,63 +122,84 @@ const Step4Container = ({
       return;
     }
     setIsShowLoading(true);
-    const options = {
-      method: "POST",
-      body: JSON.stringify({phone_number: formatPhoneFromUrl(phone_number as string), otp_code: values?.otp})
-      
+
+    let responseData;
+    if (user_id) {
+      const options = {
+        method: "POST",
+        body: JSON.stringify({ user_id, otp_code: values?.otp }),
+      };
+
+      responseData = await sendRequest(
+        "public/employee_otp/zalo_auth",
+        options
+      );
+    } else {
+      const options = {
+        method: "POST",
+        body: JSON.stringify({
+          phone_number: formatPhoneFromUrl(phone_number as string),
+          otp_code: values?.otp,
+        }),
+      };
+
+      responseData = await sendRequest("public/employee_otp/auth", options);
     }
 
-    const responseData = await sendRequest('public/employee_otp/auth', options)
-    if(responseData.session && responseData.session?.sid){
+    if (responseData?.session?.sid) {
       setStorage({
-        ...appStorage, 
+        ...appStorage,
         sessionId: responseData.session?.sid,
         onboard: {
           ...appStorage.onboard,
           isCompleted: true,
-          focus: null
-        }
-      })
+          focus: null,
+        },
+      });
       callApiUpdateProfile(responseData.session?.sid);
       return;
     }
-    if(responseData.name){
-      setErrorMes(responseData.name)
-    }else {
-      setErrorMes(responseData.description)
+    if (responseData.name) {
+      setErrorMes(responseData.name);
+    } else {
+      setErrorMes(responseData.description);
     }
-    
+
     setIsShowLoading(false);
   };
 
   const resendOtp = async () => {
-    setValue("otp", '');
+    setValue("otp", "");
     refOtp.current.clear();
-    setErrorMes(null)
-    if(isShowLoading) return;
+    setErrorMes(null);
+    if (isShowLoading) return;
     setIsShowLoading(true);
     const options = {
-      method: 'POST',
-      body: JSON.stringify({phone_number: formatPhoneFromUrl(phone_number as string)}),
-      headers: {
-      }
-    }
-    
-    const responseData = await sendRequest('public/employee_otp/resend', options)
-    if(responseData.status === 'success'){
+      method: "POST",
+      body: JSON.stringify({
+        phone_number: formatPhoneFromUrl(phone_number as string),
+      }),
+      headers: {},
+    };
+
+    const responseData = await sendRequest(
+      "public/employee_otp/resend",
+      options
+    );
+    if (responseData.status === "success") {
       resetCountdown();
       startCountdown();
       setNotification({
-        text: 'send OTP success',
-        type: 'success'
+        text: "send OTP success",
+        type: "success",
       });
       setIsShowLoading(false);
       return;
-    }else {
-      setErrorMes(responseData.description)
+    } else {
+      setErrorMes(responseData.description);
       setIsShowLoading(false);
     }
-  }
+  };
 
   return (
     <Step4

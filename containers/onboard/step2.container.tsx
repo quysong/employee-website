@@ -1,10 +1,9 @@
-import { removeHeadBase64 } from "helpers/common";
 import useTrans from "hooks/useTrans";
 import { NotificationType } from "interfaces/notification.interface";
 import {
   ObjectUrlImageType,
   TypeImageCardId,
-  ValuesStep2Type
+  ValuesStep2Type,
 } from "interfaces/onboard.interface";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -31,10 +30,10 @@ const Step2Container = ({
   slides,
   setSlides,
   setStorage,
-  appStorage
+  appStorage,
 }: Step2ContainerProps) => {
   const { t } = useTrans();
-  
+
   const step2Data = appStorage?.onboard?.step2;
 
   const {
@@ -45,7 +44,9 @@ const Step2Container = ({
     handleSubmit,
     watch,
     setValue,
-  } = useForm({ defaultValues: { cardId: step2Data?.national_id || "", images: "" } });
+  } = useForm({
+    defaultValues: { cardId: step2Data?.national_id || "", images: "" },
+  });
 
   const { cardId } = watch();
 
@@ -101,10 +102,10 @@ const Step2Container = ({
         },
         focus: {
           index: 2,
-          steps: {...appStorage.onboard.focus.steps, step3: true}
-        }
-      }
-    })
+          steps: { ...appStorage.onboard.focus.steps, step3: true },
+        },
+      },
+    });
     setSlides({
       ...slides,
       step3: true,

@@ -1,5 +1,9 @@
 import { sendRequest } from "helpers/api";
-import { cleanObject, formatPhoneFromUrl, removeHeadBase64 } from "helpers/common";
+import {
+  cleanObject,
+  formatPhoneFromUrl,
+  removeHeadBase64,
+} from "helpers/common";
 import { formatDateDMY } from "helpers/date";
 import useTrans from "hooks/useTrans";
 import { NotificationType } from "interfaces/notification.interface";
@@ -26,13 +30,13 @@ const Step3Container = ({
   setIsShowLoading,
   isShowLoading,
   setStorage,
-  appStorage
+  appStorage,
 }: Step3ContainerProps) => {
   const { t } = useTrans();
-  
+
   const {
-    query: {phone_number, first_name},
-    asPath
+    query: { phone_number, first_name, user_id },
+    asPath,
   } = useRouter();
 
   const step3Data = appStorage?.onboard?.step3;
@@ -42,33 +46,41 @@ const Step3Container = ({
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm({defaultValues: { 
-    address: step3Data?.private_address_city || "", 
-    building: step3Data?.private_address_street || "", 
-    floor: step3Data?.private_address_street2 || "", 
-    email: step3Data?.private_email || "", 
-  } });
+  } = useForm({
+    defaultValues: {
+      address: step3Data?.private_address_city || "",
+      building: step3Data?.private_address_street || "",
+      floor: step3Data?.private_address_street2 || "",
+      email: step3Data?.private_email || "",
+    },
+  });
 
   const callApiUpdateProfile = async (sessionId: string) => {
     const birthday = appStorage.onboard.step1.birthday;
-    const resUpdateProfile = await sendRequest('private/employee_profile', {
-      method: 'PUT',
+    const resUpdateProfile = await sendRequest("private/employee_profile", {
+      method: "PUT",
       headers: {
-        'X-Openerp-Session-Id': sessionId,
-        'Accept': '*/*',
-        'Content-Type': 'application/json'
+        "X-Openerp-Session-Id": sessionId,
+        Accept: "*/*",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(cleanObject({
-        birthday: formatDateDMY(birthday.day, birthday.month, birthday.year),
-        ...{
-          ...appStorage.onboard.step2,
-          national_card_front: removeHeadBase64(appStorage.onboard.step2.national_card_front),
-          national_card_back: removeHeadBase64(appStorage.onboard.step2.national_card_back)
-        },
-        ...appStorage.onboard.step3
-      }))
-    })
-    if(resUpdateProfile.status === 'success'){
+      body: JSON.stringify(
+        cleanObject({
+          birthday: formatDateDMY(birthday.day, birthday.month, birthday.year),
+          ...{
+            ...appStorage.onboard.step2,
+            national_card_front: removeHeadBase64(
+              appStorage.onboard.step2.national_card_front
+            ),
+            national_card_back: removeHeadBase64(
+              appStorage.onboard.step2.national_card_back
+            ),
+          },
+          ...appStorage.onboard.step3,
+        })
+      ),
+    });
+    if (resUpdateProfile.status === "success") {
       setSlides({
         ...slides,
         step1: false,
@@ -78,49 +90,85 @@ const Step3Container = ({
         step5: true,
       });
       setIndexSwipe(0);
-    }else { 
-      if(resUpdateProfile.name){
+    } else {
+      if (resUpdateProfile.name) {
         setNotification({
           text: resUpdateProfile.name,
-          type: 'error'
+          type: "error",
         });
-      }else {
+      } else {
         setNotification({
           text: resUpdateProfile.description,
-          type: 'error'
+          type: "error",
         });
       }
     }
     setIsShowLoading(false);
-  }
+  };
 
   const onSubmit = async (values: ValuesStep3Type) => {
-    if(isShowLoading) return;
-    if (!phone_number || !asPath.includes('phone_number=+')) {
+    if (isShowLoading) return;
+    if (!user_id && (!phone_number || !asPath.includes("phone_number=+"))) {
       setNotification({
         text: "Missing Phone number",
-        type: 'error'
+        type: "error",
       });
       return;
-    } 
+    }
     if (!first_name) {
       setNotification({
         text: "Missing first name",
-        type: 'error'
+        type: "error",
       });
       return;
-    } 
+    }
     setIsShowLoading(true);
-    // if(appStorage.sessionId){
-    //   callApiUpdateProfile(appStorage.sessionId)
-    //   return;
-    // }
+
+    // If user_id param exists
+    if (user_id) {
+      setStorage({
+        ...appStorage,
+        onboard: {
+          ...appStorage.onboard,
+          step3: {
+            name: first_name,
+            private_phone_number: "",
+            private_address_city: values.address,
+            private_address_street: values.building,
+            private_address_street2: values.floor,
+            private_email: values.email,
+          },
+          focus: {
+            index: 3,
+            steps: { ...appStorage.onboard.focus.steps, step4: true },
+          },
+        },
+        userInfo: {
+          ...appStorage.userInfo,
+          phoneNumber: "",
+        },
+      });
+      setSlides({
+        ...slides,
+        step4: true,
+      });
+      setIndexSwipe(indexSwipe + 1);
+      setIsShowLoading(false);
+      return;
+    }
+
     const options = {
       method: "POST",
-      body: JSON.stringify({phone_number: formatPhoneFromUrl(phone_number as string)})
-    }
-    const responseData = await sendRequest('public/employee_otp/resend', options)
-    if(responseData.status === 'success'){
+      body: JSON.stringify({
+        phone_number: formatPhoneFromUrl(phone_number as string),
+      }),
+    };
+
+    const responseData = await sendRequest(
+      "public/employee_otp/resend",
+      options
+    );
+    if (responseData.status === "success") {
       setStorage({
         ...appStorage,
         onboard: {
@@ -131,18 +179,18 @@ const Step3Container = ({
             private_address_city: values.address,
             private_address_street: values.building,
             private_address_street2: values.floor,
-            private_email: values.email
+            private_email: values.email,
           },
           focus: {
             index: 3,
-            steps: {...appStorage.onboard.focus.steps, step4: true}
-          }
+            steps: { ...appStorage.onboard.focus.steps, step4: true },
+          },
         },
         userInfo: {
           ...appStorage.userInfo,
-          phoneNumber: formatPhoneFromUrl(phone_number as string)
-        }
-      })
+          phoneNumber: formatPhoneFromUrl(phone_number as string),
+        },
+      });
       setSlides({
         ...slides,
         step4: true,
@@ -150,10 +198,10 @@ const Step3Container = ({
       setIndexSwipe(indexSwipe + 1);
       setIsShowLoading(false);
       return;
-    }else {
+    } else {
       setNotification({
         text: responseData.description,
-        type: 'error'
+        type: "error",
       });
       setIsShowLoading(false);
     }

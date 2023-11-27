@@ -27,15 +27,17 @@ const Step4 = ({
   errorMessage,
   resendOtp,
   count,
-  refOtp
+  refOtp,
 }: Step4Props) => {
- 
   return (
     <Wrapper>
       <form onSubmit={handleSubmit(onSubmit)}>
         <ViewBox>
           <NormalCard>
-            <TitleSmallExtend>Code is sent to {`+${phoneNumber?.toString().trim()}`}</TitleSmallExtend>
+            <TitleSmallExtend>
+              Code is sent to{" "}
+              {phoneNumber ? `+${phoneNumber?.toString().trim()}` : "zalo app"}
+            </TitleSmallExtend>
             <FormWrapper>
               <InputOTPField
                 name="otp"
@@ -44,29 +46,35 @@ const Step4 = ({
                 refOtp={refOtp}
               />
               {errorMessage ? (
-                <ErrorMessage style={{textAlign: 'center'}} dangerouslySetInnerHTML={{__html: errorMessage}}></ErrorMessage>
+                <ErrorMessage
+                  style={{ textAlign: "center" }}
+                  dangerouslySetInnerHTML={{ __html: errorMessage }}
+                ></ErrorMessage>
               ) : null}
             </FormWrapper>
-            <ResendOTPWrapper>
-              Didn’t receive code?&nbsp;
-              {count === 61 || count === 0 ? 
-              <TitleSmallExtend
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={resendOtp}
-              >
-               Request again. 
-              </TitleSmallExtend>
-              :
-               <TitleSmallExtend
-               style={{
-                 cursor: "pointer",
-               }}>
-              Request again ({count}s). 
-             </TitleSmallExtend>
-              }
-            </ResendOTPWrapper>
+            {phoneNumber ? (
+              <ResendOTPWrapper>
+                Didn’t receive code?&nbsp;
+                {count === 61 || count === 0 ? (
+                  <TitleSmallExtend
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={resendOtp}
+                  >
+                    Request again.
+                  </TitleSmallExtend>
+                ) : (
+                  <TitleSmallExtend
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    Request again ({count}s).
+                  </TitleSmallExtend>
+                )}
+              </ResendOTPWrapper>
+            ) : null}
           </NormalCard>
           <CenterElementWrapper margin="40px 0 0">
             <NormalButton buttonType="submit">Verify</NormalButton>
