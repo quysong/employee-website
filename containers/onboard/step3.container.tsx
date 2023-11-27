@@ -131,7 +131,7 @@ const Step3Container = ({
         onboard: {
           ...appStorage.onboard,
           step3: {
-            name: first_name,
+            name: first_name.toString().replaceAll("_", " "),
             private_phone_number: "",
             private_address_city: values.address,
             private_address_street: values.building,
@@ -174,7 +174,7 @@ const Step3Container = ({
         onboard: {
           ...appStorage.onboard,
           step3: {
-            name: first_name,
+            name: first_name.toString().replaceAll("_", " "),
             private_phone_number: formatPhoneFromUrl(phone_number as string),
             private_address_city: values.address,
             private_address_street: values.building,
