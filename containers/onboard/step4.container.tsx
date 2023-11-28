@@ -64,9 +64,20 @@ const Step4Container = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitCount, otp]);
 
-  const callApiUpdateProfile = async (sessionId: string) => {
+  const callApiUpdateProfile = async (
+    sessionId: string,
+    phoneNumber?: string
+  ) => {
     setErrorMes(null);
     const birthday = appStorage.onboard.step1.birthday;
+    let step3 = { ...appStorage.onboard.step3 };
+    if (phoneNumber) {
+      step3 = {
+        ...step3,
+        private_phone_number: formatPhoneFromUrl(phone_number as string),
+      };
+    }
+
     const resUpdateProfile = await sendRequest("private/employee_profile", {
       method: "PUT",
       headers: {
@@ -86,7 +97,7 @@ const Step4Container = ({
               appStorage.onboard.step2.national_card_back
             ),
           },
-          ...appStorage.onboard.step3,
+          ...step3,
         })
       ),
     });
@@ -156,7 +167,13 @@ const Step4Container = ({
           focus: null,
         },
       });
-      callApiUpdateProfile(responseData.session?.sid);
+
+      let private_phone_number;
+      if (user_id) {
+        private_phone_number = responseData.mobile_phone;
+      }
+
+      callApiUpdateProfile(responseData.session.sid, private_phone_number);
       return;
     }
     if (responseData.name) {
