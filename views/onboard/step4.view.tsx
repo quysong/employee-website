@@ -17,6 +17,7 @@ interface Step4Props {
   onClickNumber?: (value: string, e?: React.MouseEvent<HTMLDivElement>) => void;
   setCurrentFocusInput?: (value: number | null) => void;
   currentFocusInput?: number | null;
+  initialValue?: string;
 }
 
 const Step4 = ({
@@ -28,6 +29,7 @@ const Step4 = ({
   resendOtp,
   count,
   refOtp,
+  initialValue,
 }: Step4Props) => {
   return (
     <Wrapper>
@@ -44,6 +46,7 @@ const Step4 = ({
                 onChange={(curr: string) => setValue("otp", curr)}
                 isError={errorMessage}
                 refOtp={refOtp}
+                initialValue={initialValue}
               />
               {errorMessage ? (
                 <ErrorMessage

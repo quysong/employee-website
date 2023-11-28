@@ -31,9 +31,10 @@ const Step4Container = ({
   setStorage,
   appStorage,
 }: Step4ContainerProps) => {
+  const [shouldRender, setShouldRender] = useState(true);
   const { t } = useTrans();
   const {
-    query: { phone_number, user_id },
+    query: { phone_number, user_id, otp_code },
   } = useRouter();
 
   const refOtp: any = useRef();
@@ -64,6 +65,16 @@ const Step4Container = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitCount, otp]);
 
+  useEffect(() => {
+    if (otp_code) {
+      setShouldRender(false);
+      setValue("otp", otp_code);
+      setTimeout(() => {
+        setShouldRender(true);
+      }, 100);
+    }
+  }, [otp_code]);
+
   const callApiUpdateProfile = async (
     sessionId: string,
     phoneNumber?: string
@@ -74,7 +85,7 @@ const Step4Container = ({
     if (phoneNumber) {
       step3 = {
         ...step3,
-        private_phone_number: formatPhoneFromUrl(phone_number as string),
+        private_phone_number: formatPhoneFromUrl(phoneNumber as string),
       };
     }
 
@@ -90,12 +101,12 @@ const Step4Container = ({
           birthday: formatDateDMY(birthday.day, birthday.month, birthday.year),
           ...{
             ...appStorage.onboard.step2,
-            national_card_front: removeHeadBase64(
-              appStorage.onboard.step2.national_card_front
-            ),
-            national_card_back: removeHeadBase64(
-              appStorage.onboard.step2.national_card_back
-            ),
+            national_card_front: appStorage.onboard.step2.national_card_front
+              ? removeHeadBase64(appStorage.onboard.step2.national_card_front)
+              : "",
+            national_card_back: appStorage.onboard.step2.national_card_back
+              ? removeHeadBase64(appStorage.onboard.step2.national_card_back)
+              : "",
           },
           ...step3,
         })
@@ -219,17 +230,22 @@ const Step4Container = ({
   };
 
   return (
-    <Step4
-      t={t}
-      phoneNumber={phone_number}
-      onSubmit={onSubmit}
-      handleSubmit={handleSubmit}
-      setValue={setValue}
-      errorMessage={errors.otp?.message ?? errorMes}
-      resendOtp={resendOtp}
-      count={count}
-      refOtp={refOtp}
-    />
+    <>
+      {shouldRender ? (
+        <Step4
+          t={t}
+          phoneNumber={phone_number}
+          onSubmit={onSubmit}
+          handleSubmit={handleSubmit}
+          setValue={setValue}
+          errorMessage={errors.otp?.message ?? errorMes}
+          resendOtp={resendOtp}
+          count={count}
+          refOtp={refOtp}
+          initialValue={otp_code ? otp_code.toString() : undefined}
+        />
+      ) : null}
+    </>
   );
 };
 
